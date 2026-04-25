@@ -1,6 +1,10 @@
-# .
+# wzk123-happy.github.io
 
-This template should help get you started developing with Vue 3 in Vite.
+我的小菜儿网页
+
+---
+
+本项目基于 Vue 3 + Vite 搭建，用于个人博客学习。
 
 ## Recommended IDE Setup
 
@@ -23,16 +27,3 @@ See [Vite Configuration Reference](https://vite.dev/config/).
 
 ```sh
 npm install
-```
-
-### Compile and Hot-Reload for Development
-
-```sh
-npm run dev
-```
-
-### Compile and Minify for Production
-
-```sh
-npm run build
-```
