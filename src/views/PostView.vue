@@ -1,47 +1,245 @@
 <template>
-  <div class="post">  <!--详细页容器-->
-    <h1>{{post.title}}</h1>  <!--post是在script中定义的响应式对象-->
-    <div class="content">{{post.content}}</div>  <!--显示文章正文-->
-    <router-link to="/">← 返回首页</router-link>  <!--回到首页的链接-->
+  <div class="post">
+    <!-- 加载状态 -->
+    <div v-if="loading" class="state-message">
+      <span class="spinner"></span>
+      <p>正在加载文章…</p>
+    </div>
+
+    <!-- 文章内容 -->
+    <template v-else>
+      <router-link to="/" class="back-link">
+        <span class="back-arrow">←</span> 返回首页
+      </router-link>
+
+      <article class="post-article">
+        <header class="post-header">
+          <div class="post-meta">
+            <span class="post-date">{{ post.date || '近期' }}</span>
+            <span class="post-tag" v-if="post.tag">{{ post.tag }}</span>
+          </div>
+          <h1 class="post-title">{{ post.title }}</h1>
+        </header>
+
+        <div class="post-body">
+          <p v-for="(paragraph, i) in paragraphs" :key="i" class="post-paragraph">{{ paragraph }}</p>
+        </div>
+
+        <footer class="post-footer">
+          <div class="divider"></div>
+          <p class="footer-text">感谢阅读 ❤️</p>
+        </footer>
+      </article>
+    </template>
   </div>
 </template>
 
 <script setup>
-import {ref,onMounted} from "vue";  //onMounted:生命周期钩子
-import {useRoute} from "vue-router"; //useRoute：获取当前路由信息
+import { ref, computed, onMounted } from 'vue'
+import { useRoute } from 'vue-router'
 
-const route = useRoute()  //获取当前路由信息(可拿到URL中的参数)
-const post = ref({title:'',content:''})  //响应式数据：当前文章(初始为空对象)
+const route = useRoute()
+const post = ref({ title: '', content: '' })
+const loading = ref(true)
 
-//模拟文章数据(实际应从API获取)
-const allPost = { //是一个普通的JavaScript对象(不是响应式)，来模拟后端数据
-  1:{title: '我的第一篇博客',content: '这是完整的文章内容，可以写很多文字……'},
-  2:{title: 'Vue 学习心得',content: 'Vue 组合式 API 非常方便……'}
-  //实际开发中，会用到fetch请求后端API来获取数据
-  //数据仓库,用一个叫 allPosts 的对象存放所有文章正文。
-}
+// 将文章内容按换行拆分为段落
+const paragraphs = computed(() => {
+  if (!post.value.content) return []
+  return post.value.content.split('\n').filter(p => p.trim())
+})
 
-//组件挂到页面后执行
-onMounted(() =>{ //在组件被挂载到 DOM 后自动执行
-  //这里面的代码会在页面渲染后运行，适合做数据获取
-  //从路由参数中获取文章的 id（字符串形式）
-  const id = route.params.id
-  //route.params包含了URL中的动态参数。例如访问 /post/1，route.params.id 就是字符串 "1"
-  // 根据 id 从 allPosts 中取出文章数据，如果不存在则显示默认信息
-  post.value = allPost[id] || {title: '文章不存在',content: '请检查链接'}
-  // ||的意思是，前面找不到，后面的兜底。
+onMounted(async () => {
+  try {
+    const res = await fetch('/data/posts.json')
+    const allPosts = await res.json()
+    const id = parseInt(route.params.id)
+    const found = allPosts.find(p => p.id === id)
+    post.value = found || { title: '未找到', content: '文章不存在' }
+  } catch (err) {
+    console.error(err)
+    post.value = { title: '错误', content: '加载失败' }
+  } finally {
+    loading.value = false
+  }
 })
 </script>
 
 <style scoped>
+/* ==============================
+   容器
+   ============================== */
 .post {
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 20px;
+  width: 100%;
 }
 
-.content {
-  line-height: 1.8;
-  font-size: 18px;
+/* ==============================
+   加载状态
+   ============================== */
+.state-message {
+  text-align: center;
+  padding: 3rem 1.5rem;
+  color: #b0b0b0;
+}
+
+.spinner {
+  display: block;
+  width: 36px;
+  height: 36px;
+  margin: 0 auto 1rem;
+  border: 3px solid rgba(255, 255, 255, 0.1);
+  border-top-color: #64b5f6;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ==============================
+   返回链接
+   ============================== */
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: #888;
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: 500;
+  margin-bottom: 1.5rem;
+  transition: color 0.2s;
+  padding: 0.4rem 0.75rem;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.back-link:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.back-arrow {
+  transition: transform 0.2s;
+}
+
+.back-link:hover .back-arrow {
+  transform: translateX(-3px);
+}
+
+/* ==============================
+   文章主体
+   ============================== */
+.post-article {
+  animation: fade-in 0.4s ease-out;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ==============================
+   文章头部
+   ============================== */
+.post-header {
+  margin-bottom: 2rem;
+}
+
+.post-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.post-date {
+  font-size: 0.85rem;
+  color: #888;
+}
+
+.post-tag {
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  background: rgba(100, 180, 246, 0.15);
+  color: #64b5f6;
+  padding: 0.15rem 0.6rem;
+  border-radius: 100px;
+}
+
+.post-title {
+  font-size: 2rem;
+  font-weight: 800;
+  color: #fff;
+  line-height: 1.3;
+  letter-spacing: -0.5px;
+}
+
+/* ==============================
+   文章正文
+   ============================== */
+.post-body {
+  line-height: 1.9;
+  font-size: 1.05rem;
+  color: #d0d0d0;
+}
+
+.post-paragraph {
+  margin-bottom: 1.25rem;
+}
+
+.post-paragraph:last-child {
+  margin-bottom: 0;
+}
+
+/* ==============================
+   文章页脚
+   ============================== */
+.post-footer {
+  margin-top: 2.5rem;
+}
+
+.divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+  margin-bottom: 1.5rem;
+}
+
+.footer-text {
+  text-align: center;
+  color: #666;
+  font-size: 0.9rem;
+}
+
+/* ==============================
+   响应式
+   ============================== */
+@media (max-width: 768px) {
+  .post-title {
+    font-size: 1.6rem;
+  }
+
+  .post-body {
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .post-title {
+    font-size: 1.35rem;
+  }
+
+  .post-body {
+    font-size: 0.95rem;
+  }
 }
 </style>
