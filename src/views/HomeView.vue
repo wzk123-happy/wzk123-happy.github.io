@@ -25,7 +25,8 @@
       </div>
 
       <div class="post-list">
-        <article v-for="(post, index) in posts" :key="post.id" class="post-card" :style="{ animationDelay: `${index * 0.08}s` }">
+        <article v-for="(post, index) in posts" :key="post.id" class="post-card"
+                 :style="{ animationDelay: `${index * 0.08}s` }">
           <div class="card-meta">
             <span class="post-date">{{ post.date || '近期' }}</span>
             <span class="post-tag" v-if="post.tag">{{ post.tag }}</span>
@@ -47,21 +48,49 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import {ref, onMounted} from 'vue'
+import {supabase} from '../lib/supabaseClient'
 
 const posts = ref([])
 const loading = ref(true)
 const error = ref(null)
 
+// 格式化日期
+function formatDate(dateStr) {
+  if (!dateStr) return '近期'
+  const date = new Date(dateStr)
+  return `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`
+}
+
+// 从 Supabase 获取文章
 async function fetchPosts() {
   loading.value = true
   error.value = null
+
   try {
-    const response = await fetch('/data/posts.json')
-    if (!response.ok) throw new Error('加载失败')
-    posts.value = await response.json()
+    const {data, error: supabaseError} = await supabase
+        .from('articles')
+        .select('*')
+        .order('created_at', {ascending: false})
+
+    if (supabaseError) throw new Error(supabaseError.message)
+
+    // 把数据库字段映射成模板需要的格式（data 可能为 null，需要兜底）
+    posts.value = (data || []).map(article => ({
+      id: article.id,
+      title: article.title,
+      excerpt: article.content.substring(0, 100) + '...',  // 取前100字作为摘要
+      content: article.content,
+      date: formatDate(article.created_at),
+      tag: '技术',  // 可以后续从数据库读取
+      views: article.views || 0,
+      likes: article.likes || 0
+    }))
+
+    console.log('加载成功，文章数:', posts.value.length)
   } catch (err) {
-    error.value = err.message
+    console.error('加载失败:', err)
+    error.value = err.message || '加载失败，请稍后重试'
   } finally {
     loading.value = false
   }
@@ -173,7 +202,9 @@ onMounted(fetchPosts)
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* ==============================
