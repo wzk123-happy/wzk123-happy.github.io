@@ -13,6 +13,10 @@ dist
 dist-ssr
 coverage
 *.local
+# 环境变量文件（防止密钥泄露）
+.env
+.env.local
+.env.*.local
 
 # Editor directories and files
 .vscode/*
