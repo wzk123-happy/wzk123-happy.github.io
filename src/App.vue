@@ -43,8 +43,8 @@
   --color-glass-bg: rgba(255, 255, 255, 0.06);
   --color-glass-border: rgba(255, 255, 255, 0.12);
   --color-text-primary: #e8e8e8;
-  --color-text-secondary: #b0b0b0;
-  --color-text-muted: #888;
+  --color-text-secondary: #ccc;
+  --color-text-muted: #999;
   --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.2);
   --shadow-md: 0 8px 32px rgba(0, 0, 0, 0.3);
   --shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.4);
@@ -103,22 +103,12 @@ html, body {
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
-  opacity: 0.35;
+  opacity: 0.45;
   z-index: -1;
   transform: translateZ(0);
 }
 
-/* 背景遮罩渐变 */
-.background-layer::after {
-  content: '';
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  background: linear-gradient(135deg, rgba(10, 10, 30, 0.85) 0%, rgba(20, 10, 30, 0.7) 50%, rgba(10, 20, 30, 0.85) 100%);
-  z-index: 0;
-}
+/* 背景遮罩渐变（已移除，让背景图清晰可见） */
 
 /* ==============================
    主应用容器
@@ -151,15 +141,12 @@ html, body {
 .header-inner {
   max-width: 1100px;
   margin: 0 auto;
-  display: grid;
-  grid-template-columns: 1fr auto 1fr;
+  display: flex;
+  justify-content: center;
   align-items: center;
+  gap: 2rem;
   padding: 0 2rem;
   height: 60px;
-}
-
-.header-inner nav {
-  justify-self: center;
 }
 
 .logo {
@@ -231,13 +218,7 @@ main {
 .content-wrapper {
   max-width: 800px;
   width: 100%;
-  background: var(--color-glass-bg);
-  border-radius: var(--radius-lg);
   padding: 2.5rem;
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  box-shadow: var(--shadow-md);
-  border: 1px solid var(--color-glass-border);
 }
 
 /* ==============================
@@ -297,7 +278,6 @@ main {
 
   .content-wrapper {
     padding: 1.5rem;
-    border-radius: var(--radius-md);
   }
 }
 
@@ -326,7 +306,6 @@ main {
 
   .content-wrapper {
     padding: 1.2rem;
-    border-radius: var(--radius-sm);
   }
 }
 </style>

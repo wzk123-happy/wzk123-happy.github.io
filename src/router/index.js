@@ -22,7 +22,8 @@ const router = createRouter({  //创建一个路由实例
     },
     {
       path:'/posts',
-      redirect:'/' //将 /posts 重定向到首页
+      name:'posts',
+      component: () => import('../views/PostsView.vue')
     },
     {
       path:'/post/:id',   // 动态路由参数 :id，在组件中可以通过 useRoute().params.id 获取这个值

@@ -16,13 +16,17 @@
 
     <!-- 正常内容 -->
     <template v-else>
-      <div class="page-header">
-        <h1 class="page-title">
-          <span class="title-icon">📰</span>
-          最新文章
-        </h1>
-        <p class="page-subtitle">阅读、思考、分享</p>
-      </div>
+      <!-- 搜索框 -->
+      <form class="search-bar" @submit.prevent="goSearch">
+        <span class="search-icon">🔍</span>
+        <input
+          v-model="searchKeyword"
+          type="text"
+          placeholder="搜索感兴趣的文章…"
+          class="search-input"
+        />
+        <button type="submit" class="search-btn">搜索</button>
+      </form>
 
       <div class="post-list">
         <article v-for="(post, index) in posts" :key="post.id" class="post-card"
@@ -49,7 +53,18 @@
 
 <script setup>
 import {ref, onMounted} from 'vue'
+import {useRouter} from 'vue-router'
 import {supabase} from '../lib/supabaseClient'
+
+const router = useRouter()
+const searchKeyword = ref('')
+
+function goSearch() {
+  const q = searchKeyword.value.trim()
+  if (q) {
+    router.push({path: '/posts', query: {q}})
+  }
+}
 
 const posts = ref([])
 const loading = ref(true)
@@ -79,7 +94,7 @@ async function fetchPosts() {
     posts.value = (data || []).map(article => ({
       id: article.id,
       title: article.title,
-      excerpt: article.content.substring(0, 100) + '...',  // 取前100字作为摘要
+      excerpt: article.description || article.content.substring(0, 100) + '...',  // 优先读取 description 字段
       content: article.content,
       date: formatDate(article.created_at),
       tag: '技术',  // 可以后续从数据库读取
@@ -108,36 +123,6 @@ onMounted(fetchPosts)
   display: flex;
   flex-direction: column;
   align-items: center;
-}
-
-/* ==============================
-   页面标题区
-   ============================== */
-.page-header {
-  text-align: center;
-  margin-bottom: 2.5rem;
-}
-
-.page-title {
-  font-size: 2rem;
-  font-weight: 700;
-  color: #fff;
-  margin-bottom: 0.35rem;
-  letter-spacing: -0.5px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-}
-
-.title-icon {
-  font-size: 1.8rem;
-}
-
-.page-subtitle {
-  color: #888;
-  font-size: 0.95rem;
-  font-weight: 400;
 }
 
 /* ==============================
@@ -205,6 +190,64 @@ onMounted(fetchPosts)
   to {
     transform: rotate(360deg);
   }
+}
+
+/* ==============================
+   搜索框
+   ============================== */
+.search-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 0 1rem;
+  margin-bottom: 2rem;
+  transition: border-color 0.2s;
+}
+
+.search-bar:focus-within {
+  border-color: rgba(100, 180, 246, 0.4);
+}
+
+.search-icon {
+  font-size: 1.1rem;
+  flex-shrink: 0;
+}
+
+.search-input {
+  flex: 1;
+  padding: 0.75rem 0;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: #ddd;
+  font-size: 0.95rem;
+  font-family: inherit;
+}
+
+.search-input::placeholder {
+  color: #888;
+}
+
+.search-btn {
+  padding: 0.45rem 1.2rem;
+  background: #64b5f6;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: inherit;
+  flex-shrink: 0;
+}
+
+.search-btn:hover {
+  background: #90caf9;
 }
 
 /* ==============================
@@ -280,7 +323,7 @@ onMounted(fetchPosts)
 
 .post-date {
   font-size: 0.8rem;
-  color: #888;
+  color: #bbb;
 }
 
 .post-tag {
@@ -311,7 +354,7 @@ onMounted(fetchPosts)
 }
 
 .post-excerpt {
-  color: #b0b0b0;
+  color: #ccc;
   font-size: 0.92rem;
   line-height: 1.65;
   margin-bottom: 1rem;

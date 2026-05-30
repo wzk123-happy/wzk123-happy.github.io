@@ -82,10 +82,10 @@
               placeholder="写下你的想法…"
               class="comment-textarea"
               rows="3"
-              maxlength="500"
+              maxlength="5000"
             ></textarea>
             <div class="comment-form-footer">
-              <span class="char-count">{{ newContent.length }}/500</span>
+              <span class="char-count">{{ newContent.length }}/5000</span>
               <button
                 @click="submitComment"
                 :disabled="!newContent.trim() || submitLoading"
@@ -159,6 +159,7 @@ async function loadComments() {
     .select('*')
     .eq('article_id', articleId)
     .order('created_at', { ascending: true })
+    .limit(10000)
 
   if (!error && data) {
     comments.value = data.map(c => ({
@@ -266,7 +267,7 @@ onMounted(() => {
 .state-message {
   text-align: center;
   padding: 3rem 1.5rem;
-  color: #b0b0b0;
+  color: #ccc;
 }
 
 .state-error {
@@ -305,7 +306,7 @@ onMounted(() => {
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
-  color: #888;
+  color: #999;
   text-decoration: none;
   font-size: 0.9rem;
   font-weight: 500;
@@ -364,7 +365,7 @@ onMounted(() => {
 
 .post-date {
   font-size: 0.85rem;
-  color: #888;
+  color: #999;
 }
 
 .post-tag {
@@ -392,7 +393,7 @@ onMounted(() => {
 .post-body {
   line-height: 1.9;
   font-size: 1.05rem;
-  color: #d0d0d0;
+  color: #ccc;
 }
 
 .post-paragraph {
@@ -421,13 +422,13 @@ onMounted(() => {
   justify-content: center;
   gap: 2rem;
   margin-bottom: 1rem;
-  color: #888;
+  color: #999;
 }
 
 .like-btn {
   background: none;
   border: none;
-  color: #888;
+  color: #999;
   cursor: pointer;
   font-size: 1rem;
   transition: all 0.2s;
@@ -440,7 +441,7 @@ onMounted(() => {
 
 .footer-text {
   text-align: center;
-  color: #666;
+  color: #999;
   font-size: 0.9rem;
 }
 
@@ -461,7 +462,7 @@ onMounted(() => {
 /* 空状态 */
 .comments-empty {
   text-align: center;
-  color: #666;
+  color: #999;
   padding: 2rem 1rem;
   background: rgba(255, 255, 255, 0.03);
   border-radius: 12px;
@@ -507,11 +508,11 @@ onMounted(() => {
 
 .comment-time {
   font-size: 0.75rem;
-  color: #666;
+  color: #999;
 }
 
 .comment-content {
-  color: #c0c0c0;
+  color: #ccc;
   font-size: 0.92rem;
   line-height: 1.7;
 }
@@ -550,7 +551,7 @@ onMounted(() => {
 }
 
 .comment-input::placeholder {
-  color: #666;
+  color: #999;
 }
 
 .comment-textarea {
@@ -573,7 +574,7 @@ onMounted(() => {
 }
 
 .comment-textarea::placeholder {
-  color: #666;
+  color: #999;
 }
 
 .comment-form-footer {
